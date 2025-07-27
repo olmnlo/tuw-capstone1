@@ -75,7 +75,7 @@ public class UserController {
 
     @GetMapping("/compare")
     public ResponseEntity<?> compareTwoProducts(@RequestParam("product1") String productId1,@RequestParam("product2") String productId2){
-        Map<String, Double> compared = userService.compareTwoProducts(productId1, productId2);
+        Map<Product, Map<String, Boolean>> compared = userService.compareTwoProducts(productId1, productId2);
         if(compared == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("some products not found check the id again"));
         }

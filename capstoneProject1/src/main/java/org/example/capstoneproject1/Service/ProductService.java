@@ -40,7 +40,8 @@ public class ProductService {
     }
 
 
-    //filter by TOP 10 RATED products logic #1
+    //5 endpoints with logic
+    //1: filter by TOP 10 RATED products logic #1
     public ArrayList<Product> filterByRate(){
         if(products.isEmpty()){
             return null;

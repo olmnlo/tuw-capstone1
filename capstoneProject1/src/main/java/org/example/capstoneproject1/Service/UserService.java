@@ -5,10 +5,7 @@ import org.example.capstoneproject1.Model.Product;
 import org.example.capstoneproject1.Model.User;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -70,43 +67,54 @@ public class UserService {
 
 
     //5 endpoints
-    //compare two products
-    public Map<String, Double> compareTwoProducts(String producId1, String productId2){
+    //2: compare two products
+    public Map<Product, Map<String, Boolean>> compareTwoProducts(String productId1, String productId2) {
         Product product1 = null;
         Product product2 = null;
-        Map<String , Double> comparedItem = new LinkedHashMap<>();
-        for (Product p : productService.getAll()){
-            if(p.getId().equals(producId1)){
+
+        for (Product p : productService.getAll()) {
+            if (p.getId().equals(productId1)) {
                 product1 = p;
             }
-            if(p.getId().equals(productId2)){
+            if (p.getId().equals(productId2)) {
                 product2 = p;
             }
-
-            if(product1 != null && product2 != null){
-                break;
-            }
+            if (product1 != null && product2 != null) break;
         }
 
-        if(product1 == null || product2 == null) {
+        if (product1 == null || product2 == null) {
             return null;
         }
 
-        if(product1.getPrice() > product2.getPrice()){
-            comparedItem.put("product1 id: "+product1.getId()+" is more Price: ", product1.getPrice());
-        }else if (product1.getPrice() < product2.getPrice()){
-            comparedItem.put("product2 is more Price: ", product2.getPrice());
-        }else {
-            comparedItem.put("product1 id: "+product1.getId() + " and product2 id: "+ product2.getId()+ "are equal price", product2.getPrice());
+        Map<String, Boolean> comparison1 = new LinkedHashMap<>();
+        Map<String, Boolean> comparison2 = new LinkedHashMap<>();
+        if (product1.getPrice() < product2.getPrice()) {
+            comparison1.put("price", true);
+            comparison2.put("price", false);
+        } else if (product1.getPrice() > product2.getPrice()) {
+            comparison1.put("price", false);
+            comparison2.put("price", true);
+        } else {
+            comparison1.put("price", true);
+            comparison2.put("price", true);
         }
-        if(product1.getProductRate() > product2.getProductRate()){
-            comparedItem.put("product1 is more Rate: ", product1.getProductRate());
-        }else if (product1.getProductRate() < product2.getProductRate()){
-            comparedItem.put("product2 is more Rate: ", product2.getProductRate());
-        }else {
-            comparedItem.put("product1 id: "+product1.getProductRate() + " and product2 id: "+ product2.getId()+ "are equal Rate", product2.getProductRate());
+
+        if (product1.getProductRate() > product2.getProductRate()) {
+            comparison1.put("rate", true);
+            comparison2.put("rate", false);
+        } else if (product1.getProductRate() < product2.getProductRate()) {
+            comparison1.put("rate", false);
+            comparison2.put("rate", true);
+        } else {
+            comparison1.put("rate", true);
+            comparison2.put("rate", true);
         }
-        return comparedItem;
+
+        Map<Product, Map<String, Boolean>> result = new LinkedHashMap<>();
+        result.put(product1, comparison1);
+        result.put(product2, comparison2);
+
+        return result;
     }
 
 }
