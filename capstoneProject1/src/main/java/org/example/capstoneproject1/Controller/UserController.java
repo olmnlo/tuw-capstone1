@@ -1,7 +1,6 @@
 package org.example.capstoneproject1.Controller;
 
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.example.capstoneproject1.Api.ApiResponse;
 import org.example.capstoneproject1.Model.Product;
@@ -12,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 @RestController
@@ -73,6 +71,9 @@ public class UserController {
         }
     }
 
+
+    //5 endpoints
+    //2: compare two products
     @GetMapping("/compare")
     public ResponseEntity<?> compareTwoProducts(@RequestParam("product1") String productId1,@RequestParam("product2") String productId2){
         Map<Product, Map<String, Boolean>> compared = userService.compareTwoProducts(productId1, productId2);
@@ -81,6 +82,18 @@ public class UserController {
         }
         else {
             return ResponseEntity.status(HttpStatus.OK).body(compared);
+        }
+    }
+
+    //5 endpoints
+    //3: buy again
+    @GetMapping("/{userId}/history")
+    public ResponseEntity<?> buyAgain(@PathVariable String userId){
+        ArrayList<Product> userHistory = userService.buyAgain(userId);
+        if(userHistory == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("no history found"));
+        }else {
+            return ResponseEntity.status(HttpStatus.OK).body(userHistory);
         }
     }
 

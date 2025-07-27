@@ -20,6 +20,7 @@ public class UserService {
     }
 
     public void addUser(User user) {
+        user.setHistoryProducts(new ArrayList<>());
         users.add(user);
     }
 
@@ -115,6 +116,32 @@ public class UserService {
         result.put(product2, comparison2);
 
         return result;
+    }
+
+
+    //5 endpoints
+    //3. buy again
+    public ArrayList<Product> buyAgain(String userId){
+        int userIndex = 0;
+        for (int i = 0; i < users.size(); i++){
+            if(users.get(i).getId().equals(userId)){
+                userIndex = i;
+                break;
+            }
+        }
+        if(userIndex == 0){
+            return null;
+        }
+        ArrayList<Product> history = new ArrayList<>();
+        for (Product p : productService.getAll()){
+            for (String u_p : users.get(userIndex).getHistoryProducts()){
+                if(p.getId().equals(u_p)){
+                    history.add(p);
+                    break;
+                }
+            }
+        }
+        return history;
     }
 
 }

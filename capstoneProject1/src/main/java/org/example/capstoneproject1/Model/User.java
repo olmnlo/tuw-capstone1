@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+
 @Data
 @AllArgsConstructor
 @Getter
@@ -36,7 +38,8 @@ public class User {
     @Positive(message = "balance must be a positive number")
     private Double balance;
 
-
     @AssertFalse(message = "subscribe by default false")
     private boolean subscribed;
+
+    private ArrayList<String> historyProducts;
 }

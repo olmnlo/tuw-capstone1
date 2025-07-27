@@ -75,6 +75,7 @@ public class MerchantStockService {
                                 if(p.getPrice() <= u.getBalance()){
                                     u.setBalance(u.getBalance()-p.getPrice());
                                     m.setStock(m.getStock()-1);
+                                    u.getHistoryProducts().add(m.getProductId());
                                     return 1; // thank you for buying come again
                                 }else {
                                     return 2; // user balance less than product price

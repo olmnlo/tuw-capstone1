@@ -57,8 +57,8 @@ public class ProductController {
     @GetMapping("/top")
     public ResponseEntity<?> filterByTop10Rate(){
         ArrayList<Product> filtered = productService.filterByRate();
-        if(filtered.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ApiResponse("no products"));
+        if(filtered == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("no products"));
         }else {
             return ResponseEntity.status(HttpStatus.OK).body(filtered);
         }
