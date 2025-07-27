@@ -1,0 +1,7 @@
+//merchant has sold product (how many solded and his arba7)
+//offer on subscribed (some products has discount for subscibed users)
+//outlet (merchant can add his product to outlet and make big discount 50% - 80%)
+//seasonal products (merchant can add his products to seasonal to be more shown to users)
+//discount coupon (with some products there is REDEM code make discount for user)
+//resent added products (last added products)
+

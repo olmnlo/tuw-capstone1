@@ -38,7 +38,7 @@ public class User {
     @Positive(message = "balance must be a positive number")
     private Double balance;
 
-    @AssertFalse(message = "subscribe by default false")
+    @NotNull(message = "subscribed is required")
     private boolean subscribed;
 
     private ArrayList<String> historyProducts;

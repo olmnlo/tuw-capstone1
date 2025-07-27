@@ -30,4 +30,6 @@ public class Product {
     @DecimalMax(value = "5.0", message = "maximum rate is 5.0")
     private double productRate;
 
+    private double offer;
+
 }
