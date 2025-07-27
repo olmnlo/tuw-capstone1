@@ -33,6 +33,12 @@ public class MerchantService {
     }
 
     public boolean deleteMerchant(String id) {
-        return merchants.removeIf(m -> m.getId().equals(id));
+        for (Merchant m : merchants){
+            if(m.getId().equals(id)){
+                merchants.remove(m);
+                return true;
+            }
+        }
+        return false;
     }
 }
