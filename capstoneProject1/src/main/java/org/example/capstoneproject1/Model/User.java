@@ -35,4 +35,8 @@ public class User {
     @NotNull(message = "balance must not be empty")
     @Positive(message = "balance must be a positive number")
     private Double balance;
+
+
+    @AssertFalse(message = "subscribe by default false")
+    private boolean subscribed;
 }

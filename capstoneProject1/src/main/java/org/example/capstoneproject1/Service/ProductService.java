@@ -40,5 +40,24 @@ public class ProductService {
     }
 
 
-
+    //filter by TOP 10 RATED products logic #1
+    public ArrayList<Product> filterByRate(){
+        if(products.isEmpty()){
+            return null;
+        }
+        ArrayList<Product> filtered = new ArrayList<>();
+        for (int i = 0; i < products.size() - 1; i++) {
+            for (int j = 0; j < products.size() - i - 1; j++) {
+                if (products.get(j).getProductRate() > products.get(j + 1).getProductRate()) {
+                    Product temp = products.get(j);
+                    products.set(j, products.get(j + 1));
+                    products.set(j + 1, temp);
+                }
+            }
+        }
+        for (int i = products.size()-1; i > products.size()-11; i--){
+            filtered.add(products.get(i));
+        }
+        return filtered;
+    }
 }

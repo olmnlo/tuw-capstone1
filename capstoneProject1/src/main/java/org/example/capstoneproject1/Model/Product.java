@@ -1,9 +1,6 @@
 package org.example.capstoneproject1.Model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -25,7 +22,12 @@ public class Product {
     @Positive(message = "Price must be a positive number")
     private Double price;
 
-    @NotNull(message = "Category ID must not be empty")
+    @NotBlank(message = "Category ID must not be empty")
     private String categoryID;
+
+    @NotNull(message = "product rate is required")
+    @DecimalMin(value = "0.0", message = "minimum rate is 0")
+    @DecimalMax(value = "5.0", message = "maximum rate is 5.0")
+    private double productRate;
 
 }
