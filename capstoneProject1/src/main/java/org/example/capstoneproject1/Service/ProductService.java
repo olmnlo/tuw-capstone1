@@ -56,7 +56,7 @@ public class ProductService {
                 }
             }
         }
-        for (int i = products.size()-1; i > products.size()-11; i--){
+        for (int i = products.size() - 1; i >= Math.max(0, products.size() - 10); i--){
             filtered.add(products.get(i));
         }
         return filtered;

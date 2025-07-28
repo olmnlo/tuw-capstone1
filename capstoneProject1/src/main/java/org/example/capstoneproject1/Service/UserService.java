@@ -71,7 +71,6 @@ public class UserService {
     public Map<Product, Map<String, Boolean>> compareTwoProducts(String productId1, String productId2) {
         Product product1 = null;
         Product product2 = null;
-
         for (Product p : productService.getAll()) {
             if (p.getId().equals(productId1)) {
                 product1 = p;
@@ -79,13 +78,13 @@ public class UserService {
             if (p.getId().equals(productId2)) {
                 product2 = p;
             }
-            if (product1 != null && product2 != null) break;
+            if (product1 != null && product2 != null) {
+                break;
+            }
         }
-
         if (product1 == null || product2 == null) {
             return null;
         }
-
         Map<String, Boolean> comparison1 = new LinkedHashMap<>();
         Map<String, Boolean> comparison2 = new LinkedHashMap<>();
         if (product1.getPrice() < product2.getPrice()) {
@@ -98,7 +97,6 @@ public class UserService {
             comparison1.put("price", true);
             comparison2.put("price", true);
         }
-
         if (product1.getProductRate() > product2.getProductRate()) {
             comparison1.put("rate", true);
             comparison2.put("rate", false);
@@ -109,11 +107,9 @@ public class UserService {
             comparison1.put("rate", true);
             comparison2.put("rate", true);
         }
-
         Map<Product, Map<String, Boolean>> result = new LinkedHashMap<>();
         result.put(product1, comparison1);
         result.put(product2, comparison2);
-
         return result;
     }
 

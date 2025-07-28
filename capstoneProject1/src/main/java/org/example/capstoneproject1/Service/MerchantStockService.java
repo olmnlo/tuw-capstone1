@@ -118,9 +118,9 @@ public class MerchantStockService {
                         if(p.getId().equals(productId)){
                             p.setOffer(discount);
                             p.setSeasonalProduct(!m.isSeasonalProduct());
+                            m.setSeasonalProduct(!m.isSeasonalProduct());
                         }
                     }
-                    m.setSeasonalProduct(!m.isSeasonalProduct());
                     return 1; //product now updated successfully: it is in seasonal product offers now
                 }
                 return 2; // product not found
@@ -151,6 +151,12 @@ public class MerchantStockService {
 
         Map<String, Integer> merchantStockMap = new HashMap<>();
 
+        int maxSold = 0;
+        for (MerchantStock stock : stocks){
+            maxSold = Math.max(maxSold,stock.getSoldProducts());
+        }
+
+
         for (MerchantStock stock : stocks) {
             String merchantId = stock.getMerchantId();
 
@@ -160,7 +166,8 @@ public class MerchantStockService {
 
             if (sold == 0) sold = 1;
 
-            double ratio = rate / sold;
+            double normalizedSold = (double) sold / maxSold;
+            double ratio = (rate * 0.7) + (normalizedSold * 0.3);
 
             if (merchantScoreMap.containsKey(merchantId)) {
                 double oldRatio = merchantScoreMap.get(merchantId);
@@ -193,14 +200,7 @@ public class MerchantStockService {
             double ratio = entry.getValue();
             int stock = merchantStockMap.getOrDefault(merchantId, 0);
 
-            String merchantName = "";
-            for (Merchant m : merchantService.getAll()) {
-                if (m.getId().equals(merchantId)) {
-                    merchantName = m.getName();
-                    break;
-                }
-            }
-            output.add("Merchant: " + merchantName + ", Score: " + String.format("%.2f", ratio) + ", Stock: " + stock);
+            output.add("MerchantId: " + merchantId + ", Score: " + String.format("%.2f", ratio) + ", Stock: " + stock);
         }
 
         return output;
