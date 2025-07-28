@@ -134,7 +134,7 @@ public class MerchantStockService {
 
     //5 endpoints
     //5. merchants performance
-    public ArrayList<String> merchantPerformance(String userId) {
+    public ArrayList<String> merchantPerformance(String userId, boolean quality) {
         User foundUser = null;
         for (User u : userService.getAll()) {
             if (u.getId().equals(userId)) {
@@ -167,8 +167,12 @@ public class MerchantStockService {
             if (sold == 0) sold = 1;
 
             double normalizedSold = (double) sold / maxSold;
-            double ratio = (rate * 0.7) + (normalizedSold * 0.3);
-
+            double ratio;
+            if (quality) {
+                ratio =(rate * 0.7) + (normalizedSold * 0.3);
+            }else {
+                ratio =(rate * 0.5) + (normalizedSold * 0.5);
+            }
             if (merchantScoreMap.containsKey(merchantId)) {
                 double oldRatio = merchantScoreMap.get(merchantId);
                 merchantScoreMap.put(merchantId, (oldRatio + ratio) / 2);

@@ -90,9 +90,9 @@ public class MerchantStockController {
         }
     }
 
-    @GetMapping("/performance/admin/{userId}")
-    public ResponseEntity<?> merchantPerformance(@PathVariable String userId){
-        ArrayList<String> merchantPerform = merchantStockService.merchantPerformance(userId);
+    @GetMapping("/performance/admin/{userId}/quality/{quality}")
+    public ResponseEntity<?> merchantPerformance(@PathVariable String userId, @PathVariable boolean quality){
+        ArrayList<String> merchantPerform = merchantStockService.merchantPerformance(userId, quality);
         if (merchantPerform == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized");
         }
