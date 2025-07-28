@@ -29,5 +29,8 @@ public class MerchantStock {
     @AssertFalse(message = "it must be false")
     private boolean isSeasonalProduct;
 
+    private int soldProducts;
+    private double merchantRate;
+
 
 }

@@ -1,5 +1,6 @@
 package org.example.capstoneproject1.Controller;
 
+import jakarta.servlet.http.PushBuilder;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.capstoneproject1.Api.ApiResponse;
@@ -8,6 +9,8 @@ import org.example.capstoneproject1.Service.MerchantStockService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/v1/merchant-stock")
@@ -46,21 +49,19 @@ public class MerchantStockController {
     }
 
 
-
-
-    public ResponseEntity<?> updateStock(@PathVariable String productId, @PathVariable String merchantId, @PathVariable int amount ){
+    public ResponseEntity<?> updateStock(@PathVariable String productId, @PathVariable String merchantId, @PathVariable int amount) {
         boolean stock = merchantStockService.addToStock(productId, merchantId, amount);
-        if (stock){
+        if (stock) {
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("product add to stock successfully"));
-        }else {
+        } else {
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("not found product/merchant in stock"));
         }
     }
 
     @PostMapping("/buy/user/{userId}/product/{productId}/merchant/{merchantId}")
-    public ResponseEntity<?> buyDirectlyFromStock(@PathVariable String userId,@PathVariable String productId,@PathVariable String merchantId){
+    public ResponseEntity<?> buyDirectlyFromStock(@PathVariable String userId, @PathVariable String productId, @PathVariable String merchantId) {
         int msg = merchantStockService.buyDirectly(userId, productId, merchantId);
-        switch (msg){
+        switch (msg) {
             case 1:
                 return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("thank you for buying come again"));
             case 2:
@@ -74,15 +75,27 @@ public class MerchantStockController {
 
         }
     }
+
     @PutMapping("/{merchantId}/product/{productId}/toggle-bigdeal/{discount}")
-    public ResponseEntity<?> toggleSeasonalProduct(@PathVariable String productId, @PathVariable String merchantId, @PathVariable double discount){
-        int msg = merchantStockService.seasonalProducts(merchantId,productId,discount);
-        if(msg == 1){
+    public ResponseEntity<?> toggleSeasonalProduct(@PathVariable String productId, @PathVariable String merchantId, @PathVariable double discount, PushBuilder pushBuilder) {
+        int msg = merchantStockService.seasonalProducts(merchantId, productId, discount);
+        if (msg == 1) {
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("product now updated successfully: it is in seasonal product offers now"));
         } else if (msg == 2) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("product not found"));
-        }else {
+        } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("merchant not found"));
         }
     }
+
+    @GetMapping("/performance/admin/{userId}")
+    public ResponseEntity<?> merchantPerformance(@PathVariable String userId){
+        ArrayList<String> merchantPerform = merchantStockService.merchantPerformance(userId);
+        if (merchantPerform == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(merchantPerform);
+    }
+
 }

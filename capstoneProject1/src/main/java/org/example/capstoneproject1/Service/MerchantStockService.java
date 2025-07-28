@@ -1,12 +1,15 @@
 package org.example.capstoneproject1.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.capstoneproject1.Model.Merchant;
 import org.example.capstoneproject1.Model.MerchantStock;
 import org.example.capstoneproject1.Model.Product;
 import org.example.capstoneproject1.Model.User;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +17,7 @@ public class MerchantStockService {
 
     private final UserService userService;
     private final ProductService productService;
+    private final MerchantService merchantService;
     private ArrayList<MerchantStock> stocks = new ArrayList<>();
 
     public ArrayList<MerchantStock> getAll() {
@@ -120,5 +124,90 @@ public class MerchantStockService {
         }
         return 3; // merchant not found
     }
+
+
+
+
+    //5 endpoints
+    //5. merchants performance
+    public ArrayList<String> merchantPerformance(String userId) {
+        User foundUser = null;
+        for (User u : userService.getAll()) {
+            if (u.getId().equals(userId)) {
+                foundUser = u;
+                break;
+            }
+        }
+
+        if (foundUser == null || !foundUser.getRole().equals("Admin")) {
+            return null;
+        }
+
+
+        // merchantId -> (rate / soldProducts)
+        Map<String, Double> merchantScoreMap = new HashMap<>();
+        // merchantId -> stock
+        Map<String, Integer> merchantStockMap = new HashMap<>();
+
+        for (MerchantStock stock : stocks) {
+            String merchantId = stock.getMerchantId();
+
+            double rate = stock.getMerchantRate(); // from your model
+            int sold = stock.getSoldProducts();    // from your model
+            int currentStock = stock.getStock();   // current remaining
+
+            if (sold == 0) sold = 1; // avoid division by zero
+
+            double ratio = rate / sold;
+
+            // if merchant already has multiple stocks, we take average rate/sold and total stock
+            if (merchantScoreMap.containsKey(merchantId)) {
+                double oldRatio = merchantScoreMap.get(merchantId);
+                merchantScoreMap.put(merchantId, (oldRatio + ratio) / 2);
+
+                int oldStock = merchantStockMap.get(merchantId);
+                merchantStockMap.put(merchantId, oldStock + currentStock);
+            } else {
+                merchantScoreMap.put(merchantId, ratio);
+                merchantStockMap.put(merchantId, currentStock);
+            }
+        }
+
+        // ترتيب حسب ratio
+        ArrayList<Map.Entry<String, Double>> entryList = new ArrayList<>(merchantScoreMap.entrySet());
+
+        for (int i = 0; i < entryList.size(); i++) {
+            for (int j = i + 1; j < entryList.size(); j++) {
+                if (entryList.get(j).getValue() > entryList.get(i).getValue()) {
+                    Map.Entry<String, Double> temp = entryList.get(i);
+                    entryList.set(i, entryList.get(j));
+                    entryList.set(j, temp);
+                }
+            }
+        }
+
+        // نطبع اسم التاجر + النسبة + مجموع stock
+        ArrayList<String> output = new ArrayList<>();
+
+        for (Map.Entry<String, Double> entry : entryList) {
+            String merchantId = entry.getKey();
+            double ratio = entry.getValue();
+            int stock = merchantStockMap.getOrDefault(merchantId, 0);
+
+            // نجيب اسم التاجر
+            String merchantName = "";
+            for (Merchant m : merchantService.getAll()) {
+                if (m.getId().equals(merchantId)) {
+                    merchantName = m.getName();
+                    break;
+                }
+            }
+            output.add("Merchant: " + merchantName + ", Score: " + String.format("%.2f", ratio) + ", Stock: " + stock);
+        }
+
+
+        return output;
+    }
+
 
 }
