@@ -79,10 +79,12 @@ public class MerchantStockService {
                                 if(p.getPrice() <= u.getBalance() && p.isSeasonalProduct()){
                                     u.setBalance(u.getBalance()-(p.getPrice()-(p.getPrice()*p.getOffer())));
                                     m.setStock(m.getStock()-1);
+                                    m.setSoldProducts(m.getSoldProducts()+1);
                                     return 1; // thank you for buying come again
                                 }else if(p.getPrice() <= u.getBalance()){
                                     u.setBalance(u.getBalance()-p.getPrice());
                                     m.setStock(m.getStock()-1);
+                                    m.setSoldProducts(m.getSoldProducts()+1);
                                     return 1; // thank you for buying come again
                                 }else {
                                     return 2; // user balance less than product price
@@ -106,6 +108,8 @@ public class MerchantStockService {
     public int seasonalProducts(String merchantId, String productId, double discount){
         if (discount >= 1){
             discount = discount/100;
+        }else if (discount < 0){
+            return -1;
         }
         for (MerchantStock m : stocks){
             if(m.getMerchantId().equals(merchantId)){
@@ -143,24 +147,21 @@ public class MerchantStockService {
             return null;
         }
 
-
-        // merchantId -> (rate / soldProducts)
         Map<String, Double> merchantScoreMap = new HashMap<>();
-        // merchantId -> stock
+
         Map<String, Integer> merchantStockMap = new HashMap<>();
 
         for (MerchantStock stock : stocks) {
             String merchantId = stock.getMerchantId();
 
-            double rate = stock.getMerchantRate(); // from your model
-            int sold = stock.getSoldProducts();    // from your model
-            int currentStock = stock.getStock();   // current remaining
+            double rate = stock.getMerchantRate();
+            int sold = stock.getSoldProducts();
+            int currentStock = stock.getStock();
 
-            if (sold == 0) sold = 1; // avoid division by zero
+            if (sold == 0) sold = 1;
 
             double ratio = rate / sold;
 
-            // if merchant already has multiple stocks, we take average rate/sold and total stock
             if (merchantScoreMap.containsKey(merchantId)) {
                 double oldRatio = merchantScoreMap.get(merchantId);
                 merchantScoreMap.put(merchantId, (oldRatio + ratio) / 2);
@@ -173,7 +174,6 @@ public class MerchantStockService {
             }
         }
 
-        // ترتيب حسب ratio
         ArrayList<Map.Entry<String, Double>> entryList = new ArrayList<>(merchantScoreMap.entrySet());
 
         for (int i = 0; i < entryList.size(); i++) {
@@ -186,7 +186,6 @@ public class MerchantStockService {
             }
         }
 
-        // نطبع اسم التاجر + النسبة + مجموع stock
         ArrayList<String> output = new ArrayList<>();
 
         for (Map.Entry<String, Double> entry : entryList) {
@@ -194,7 +193,6 @@ public class MerchantStockService {
             double ratio = entry.getValue();
             int stock = merchantStockMap.getOrDefault(merchantId, 0);
 
-            // نجيب اسم التاجر
             String merchantName = "";
             for (Merchant m : merchantService.getAll()) {
                 if (m.getId().equals(merchantId)) {
@@ -204,7 +202,6 @@ public class MerchantStockService {
             }
             output.add("Merchant: " + merchantName + ", Score: " + String.format("%.2f", ratio) + ", Stock: " + stock);
         }
-
 
         return output;
     }

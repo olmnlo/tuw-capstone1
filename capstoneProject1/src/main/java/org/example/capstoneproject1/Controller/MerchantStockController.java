@@ -79,7 +79,9 @@ public class MerchantStockController {
     @PutMapping("/{merchantId}/product/{productId}/toggle-bigdeal/{discount}")
     public ResponseEntity<?> toggleSeasonalProduct(@PathVariable String productId, @PathVariable String merchantId, @PathVariable double discount, PushBuilder pushBuilder) {
         int msg = merchantStockService.seasonalProducts(merchantId, productId, discount);
-        if (msg == 1) {
+        if (msg == -1) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("discount not applicable check discount value"));
+        } else if (msg == 1) {
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("product now updated successfully: it is in seasonal product offers now"));
         } else if (msg == 2) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("product not found"));
