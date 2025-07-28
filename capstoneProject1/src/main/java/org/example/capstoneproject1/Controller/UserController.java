@@ -86,16 +86,19 @@ public class UserController {
     }
 
     //5 endpoints
-    //3: buy again
-    @GetMapping("/{userId}/history")
-    public ResponseEntity<?> buyAgain(@PathVariable String userId){
-        ArrayList<Product> userHistory = userService.buyAgain(userId);
-        if(userHistory == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("no history found"));
+    //3: discount for subscribed users
+    @GetMapping("/{userId}/discount")
+    public ResponseEntity<?> getDiscount(@PathVariable String userId){
+        ArrayList<Product> discount = userService.discount(userId);
+
+        if(discount == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("user not found"));
+        }
+        else if (discount.isEmpty()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("no discounts"));
         }else {
-            return ResponseEntity.status(HttpStatus.OK).body(userHistory);
+            return ResponseEntity.status(HttpStatus.OK).body(discount);
         }
     }
-
 
 }

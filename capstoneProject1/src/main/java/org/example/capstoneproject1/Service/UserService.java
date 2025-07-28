@@ -20,7 +20,6 @@ public class UserService {
     }
 
     public void addUser(User user) {
-        user.setHistoryProducts(new ArrayList<>());
         users.add(user);
     }
 
@@ -120,28 +119,27 @@ public class UserService {
 
 
     //5 endpoints
-    //3. buy again
-    public ArrayList<Product> buyAgain(String userId){
-        int userIndex = 0;
-        for (int i = 0; i < users.size(); i++){
+    //3.discount on subscribed users only
+    public ArrayList<Product> discount(String userId){
+        ArrayList<Product> discount = new ArrayList<>();
+        int userIndex = -1;
+        for (int i = 0; i < users.size(); i++) {
             if(users.get(i).getId().equals(userId)){
                 userIndex = i;
-                break;
             }
         }
-        if(userIndex == 0){
+        if(userIndex == -1){
             return null;
         }
-        ArrayList<Product> history = new ArrayList<>();
-        for (Product p : productService.getAll()){
-            for (String u_p : users.get(userIndex).getHistoryProducts()){
-                if(p.getId().equals(u_p)){
-                    history.add(p);
-                    break;
-                }
+
+        for(Product p : productService.getAll()){
+            if(p.isDiscount20() && users.get(userIndex).isSubscribed()){
+                double discountedPrice = p.getPrice() - (p.getPrice() * 0.2);
+                Product discountedProduct = new Product(p.getId(),p.getName(),discountedPrice,p.getCategoryID(), p.getProductRate(), p.isDiscount20(), p.isSeasonalProduct(), p.getOffer());
+                discount.add(discountedProduct);
             }
         }
-        return history;
+        return discount;
     }
 
 }

@@ -40,6 +40,4 @@ public class User {
 
     @NotNull(message = "subscribed is required")
     private boolean subscribed;
-
-    private ArrayList<String> historyProducts;
 }

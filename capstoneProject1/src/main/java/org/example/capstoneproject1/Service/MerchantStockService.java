@@ -72,10 +72,13 @@ public class MerchantStockService {
                         for (Product p : productService.getAll()){
                             if(p.getId().equals(productId)){
                                 System.out.println("product found");
-                                if(p.getPrice() <= u.getBalance()){
+                                if(p.getPrice() <= u.getBalance() && p.isSeasonalProduct()){
+                                    u.setBalance(u.getBalance()-(p.getPrice()-(p.getPrice()*p.getOffer())));
+                                    m.setStock(m.getStock()-1);
+                                    return 1; // thank you for buying come again
+                                }else if(p.getPrice() <= u.getBalance()){
                                     u.setBalance(u.getBalance()-p.getPrice());
                                     m.setStock(m.getStock()-1);
-                                    u.getHistoryProducts().add(m.getProductId());
                                     return 1; // thank you for buying come again
                                 }else {
                                     return 2; // user balance less than product price
@@ -89,6 +92,33 @@ public class MerchantStockService {
             }
         }
         return 5; // merchant not found
+    }
+
+
+
+
+    //5 endpoints
+    //4. seasonal products
+    public int seasonalProducts(String merchantId, String productId, double discount){
+        if (discount >= 1){
+            discount = discount/100;
+        }
+        for (MerchantStock m : stocks){
+            if(m.getMerchantId().equals(merchantId)){
+                if(m.getProductId().equals(productId)){
+                    for (Product p : productService.getAll()){
+                        if(p.getId().equals(productId)){
+                            p.setOffer(discount);
+                            p.setSeasonalProduct(!m.isSeasonalProduct());
+                        }
+                    }
+                    m.setSeasonalProduct(!m.isSeasonalProduct());
+                    return 1; //product now updated successfully: it is in seasonal product offers now
+                }
+                return 2; // product not found
+            }
+        }
+        return 3; // merchant not found
     }
 
 }

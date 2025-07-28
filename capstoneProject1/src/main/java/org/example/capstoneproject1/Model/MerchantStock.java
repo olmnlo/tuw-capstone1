@@ -1,5 +1,6 @@
 package org.example.capstoneproject1.Model;
 
+import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,9 @@ public class MerchantStock {
 
     @Min(value = 11, message = "stock must be more than 10")
     private int stock;
+
+    @AssertFalse(message = "it must be false")
+    private boolean isSeasonalProduct;
 
 
 }

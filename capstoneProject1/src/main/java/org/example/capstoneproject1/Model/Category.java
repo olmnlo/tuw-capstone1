@@ -13,7 +13,6 @@ import lombok.Setter;
 @Setter
 public class Category {
 
-
     @NotBlank(message = "ID must not be empty")
     private String id;
 
