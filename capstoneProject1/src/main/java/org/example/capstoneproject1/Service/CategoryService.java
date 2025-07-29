@@ -14,8 +14,12 @@ public class CategoryService {
         return categories;
     }
 
-    public void addCategory(Category category) {
+    public boolean addCategory(Category category) {
+        if (categories.contains(category)) {
+            return false;
+        }
         categories.add(category);
+        return true;
     }
 
     public boolean updateCategory(String id, Category updatedCategory) {

@@ -25,9 +25,6 @@ public class Product {
     @NotBlank(message = "Category ID must not be empty")
     private String categoryID;
 
-    @NotNull(message = "product rate is required")
-    @DecimalMin(value = "0.0", message = "minimum rate is 0")
-    @DecimalMax(value = "5.0", message = "maximum rate is 5.0")
     private double productRate;
 
     private boolean discount20;

@@ -27,7 +27,9 @@ public class ProductController {
     // Add a new product
     @PostMapping("")
     public ResponseEntity<?> add(@RequestBody @Valid Product product) {
-        productService.addProduct(product);
+        if(productService.addProduct(product) == -1){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("category not found you must add new category"));
+        }
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("product add successfully"));
     }
 

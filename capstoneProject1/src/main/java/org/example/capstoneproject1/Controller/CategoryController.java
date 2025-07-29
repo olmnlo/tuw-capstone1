@@ -25,8 +25,10 @@ public class CategoryController {
     // Add new category
     @PostMapping("")
     public ResponseEntity<?> add(@RequestBody @Valid Category category) {
-        categoryService.addCategory(category);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("category added successfully"));
+        if(categoryService.addCategory(category)) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("category added successfully"));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("category duplicated"));
     }
 
     // Update category by ID

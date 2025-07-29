@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/merchant-stock")
@@ -26,7 +27,16 @@ public class MerchantStockController {
 
     @PostMapping("")
     public ResponseEntity<?> add(@RequestBody @Valid MerchantStock merchantStock) {
-        merchantStockService.addMerchantStock(merchantStock);
+        int msg = merchantStockService.addMerchantStock(merchantStock);
+        if (msg == -1) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("merchant not found"));
+        }
+        if (msg == -2){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("product not found"));
+        }
+        if(msg == -3){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("stock is duplicated"));
+        }
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("merchant stock added successfully"));
     }
 
@@ -76,7 +86,7 @@ public class MerchantStockController {
         }
     }
 
-    @PutMapping("/{merchantId}/product/{productId}/toggle-bigdeal/{discount}")
+    @PostMapping("/{merchantId}/product/{productId}/toggle-bigdeal/{discount}")
     public ResponseEntity<?> toggleSeasonalProduct(@PathVariable String productId, @PathVariable String merchantId, @PathVariable double discount, PushBuilder pushBuilder) {
         int msg = merchantStockService.seasonalProducts(merchantId, productId, discount);
         if (msg == -1) {
@@ -90,14 +100,27 @@ public class MerchantStockController {
         }
     }
 
-    @GetMapping("/performance/admin/{userId}/quality/{quality}")
-    public ResponseEntity<?> merchantPerformance(@PathVariable String userId, @PathVariable boolean quality){
-        ArrayList<String> merchantPerform = merchantStockService.merchantPerformance(userId, quality);
+    @GetMapping("/performance/user/{userId}/quality")
+    public ResponseEntity<?> merchantPerformance(@PathVariable String userId){
+        Map<String, Object> merchantPerform = merchantStockService.merchantPerformance(userId);
         if (merchantPerform == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("user not found");
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(merchantPerform);
+    }
+
+
+    @PutMapping("/{merchantId}/product/{productId}/subscribed-discount")
+    public ResponseEntity<?> toggleDiscount20(@PathVariable String merchantId, @PathVariable String productId){
+        int msg = merchantStockService.toggleDiscount20(merchantId,productId);
+
+        if(msg == -1 ){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("merchant not found");
+        }else if (msg == -2){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("product not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("discount updated"));
     }
 
 }

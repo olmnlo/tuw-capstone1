@@ -1,22 +1,39 @@
 package org.example.capstoneproject1.Service;
 
+import lombok.RequiredArgsConstructor;
+import org.example.capstoneproject1.Model.Category;
 import org.example.capstoneproject1.Model.Product;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
     private ArrayList<Product> products = new ArrayList<>();
+
+    private Map<String, ArrayList<Double>> productRateHistory = new LinkedHashMap<>();
+
+
+    private final CategoryService categoryService;
 
     public ArrayList<Product> getAll() {
         return products;
     }
 
-    public void addProduct(Product product) {
-        products.add(product);
+    public int addProduct(Product product) {
+        for (Category c : categoryService.getAll()){
+            if(c.getId().equals(product.getCategoryID())){
+                product.setProductRate(0);
+                products.add(product);
+                return 1;
+            }
+        }
+        return -1;
     }
 
     public boolean updateProduct(String id, Product updatedProduct) {
@@ -60,5 +77,9 @@ public class ProductService {
             filtered.add(products.get(i));
         }
         return filtered;
+    }
+
+    public Map<String, ArrayList<Double>> getProductRateHistory(){
+        return productRateHistory;
     }
 }

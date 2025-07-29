@@ -16,8 +16,12 @@ public class MerchantService {
         return merchants;
     }
 
-    public void addMerchant(Merchant merchant) {
+    public boolean addMerchant(Merchant merchant) {
+        if (merchants.contains(merchant)){
+            return false;
+        }
         merchants.add(merchant);
+        return true;
     }
 
     public boolean updateMerchant(String id, Merchant updatedMerchant) {

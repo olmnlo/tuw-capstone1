@@ -23,8 +23,10 @@ public class MerchantController {
 
     @PostMapping("")
     public ResponseEntity<?> add(@RequestBody @Valid Merchant merchant) {
-        merchantService.addMerchant(merchant);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("merchant added successfully"));
+        if(merchantService.addMerchant(merchant)) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("merchant added successfully"));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("merchant is duplicated"));
     }
 
     @PutMapping("/{id}")

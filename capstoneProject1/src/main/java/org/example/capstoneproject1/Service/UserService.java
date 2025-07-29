@@ -14,13 +14,18 @@ public class UserService {
     private final ProductService productService;
 
     private ArrayList<User> users = new ArrayList<>();
+    private Map<String, ArrayList<String>> userHistory = new LinkedHashMap<>();
 
     public ArrayList<User> getAll() {
         return users;
     }
 
-    public void addUser(User user) {
+    public boolean addUser(User user) {
+        if (users.contains(user)){
+            return false;
+        }
         users.add(user);
+        return true;
     }
 
     public boolean updateUser(String id, User updatedUser) {
@@ -68,7 +73,7 @@ public class UserService {
 
     //5 endpoints
     //2: compare two products
-    public Map<Product, Map<String, Boolean>> compareTwoProducts(String productId1, String productId2) {
+    public Map<String, Map<String, Boolean>> compareTwoProducts(String productId1, String productId2) {
         Product product1 = null;
         Product product2 = null;
         for (Product p : productService.getAll()) {
@@ -107,9 +112,9 @@ public class UserService {
             comparison1.put("rate", true);
             comparison2.put("rate", true);
         }
-        Map<Product, Map<String, Boolean>> result = new LinkedHashMap<>();
-        result.put(product1, comparison1);
-        result.put(product2, comparison2);
+        Map<String, Map<String, Boolean>> result = new LinkedHashMap<>();
+        result.put("product id "+product1.getId(), comparison1);
+        result.put("product id"+product2.getId(), comparison2);
         return result;
     }
 
@@ -136,6 +141,61 @@ public class UserService {
             }
         }
         return discount;
+    }
+
+
+
+    public boolean rateProduct(String productId, String userId , double rating){
+        Map<String, ArrayList<Double>> productRatings = productService.getProductRateHistory();
+        // 1. Check if the user has a history
+        if (!userHistory.containsKey(userId)) {
+            System.out.println("User not found.");
+            return false;
+        }
+
+        // 2. Check if the user has this product in history
+        if (!userHistory.get(userId).contains(productId)) {
+            return false;
+        }
+
+        productRatings.putIfAbsent(productId, new ArrayList<>());
+        productRatings.get(productId).add(rating);
+        double total = 0;
+        for (Double r : productRatings.get(productId)){
+            total+=r;
+        }
+        total = total/productRatings.get(productId).size();
+
+        for (Product p : productService.getAll()){
+            if (p.getId().equals(productId)){
+                p.setProductRate(total);
+
+            }
+        }
+
+
+        userHistory.get(userId).remove(productId);
+
+        return true;
+    }
+
+    public boolean subscribe(String userId){
+        for (User u : users){
+            if(u.getId().equals(userId)){
+                if(u.getBalance() >= 60){
+                    u.setSubscribed(true);
+                    u.setBalance(u.getBalance()-60);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+    public Map<String, ArrayList<String>> getUserHistory(){
+        return userHistory;
     }
 
 }

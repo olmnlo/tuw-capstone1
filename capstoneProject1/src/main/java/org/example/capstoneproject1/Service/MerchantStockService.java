@@ -1,15 +1,10 @@
 package org.example.capstoneproject1.Service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.capstoneproject1.Model.Merchant;
-import org.example.capstoneproject1.Model.MerchantStock;
-import org.example.capstoneproject1.Model.Product;
-import org.example.capstoneproject1.Model.User;
+import org.example.capstoneproject1.Model.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +19,24 @@ public class MerchantStockService {
         return stocks;
     }
 
-    public void addMerchantStock(MerchantStock stock) {
-        stocks.add(stock);
+    public int addMerchantStock(MerchantStock stock) {
+        if(stocks.contains(stock)){
+            return -3;
+        }
+        for (Merchant m : merchantService.getAll()){
+            if(m.getId().equals(stock.getMerchantId())){
+                for (Product p : productService.getAll()){
+                    if(p.getId().equals(stock.getProductId())){
+                        stock.setSoldProducts(0);
+                        stocks.add(stock);
+                        return 1;
+                    }
+                }
+                return -2; // product not found
+            }
+        }
+        return -1; // merchant not found
+
     }
 
     public boolean updateMerchantStock(String id, MerchantStock updatedStock) {
@@ -76,16 +87,60 @@ public class MerchantStockService {
                         for (Product p : productService.getAll()){
                             if(p.getId().equals(productId)){
                                 System.out.println("product found");
-                                if(p.getPrice() <= u.getBalance() && p.isSeasonalProduct()){
+                                if (p.getPrice() <= u.getBalance() && p.isSeasonalProduct() &&p.isDiscount20()){
+                                    double discount = p.getOffer()+0.2;
+                                    u.setBalance(u.getBalance()-(p.getPrice()-(p.getPrice()*discount)));
+                                    m.setStock(m.getStock()-1);
+                                    m.setSoldProducts(m.getSoldProducts()+1);
+
+                                    if (!userService.getUserHistory().containsKey(userId)) {
+                                        userService.getUserHistory().put(userId, new ArrayList<>());
+                                    }
+                                    if (!userService.getUserHistory().get(userId).contains(p.getId())) {
+                                        userService.getUserHistory().get(userId).add(p.getId());
+                                    }
+
+                                    return 1; // thank you for buying come again
+
+                                }else if(p.getPrice() <= u.getBalance() && p.isSeasonalProduct()){
                                     u.setBalance(u.getBalance()-(p.getPrice()-(p.getPrice()*p.getOffer())));
                                     m.setStock(m.getStock()-1);
                                     m.setSoldProducts(m.getSoldProducts()+1);
+
+                                    if (!userService.getUserHistory().containsKey(userId)) {
+                                        userService.getUserHistory().put(userId, new ArrayList<>());
+                                    }
+                                    if (!userService.getUserHistory().get(userId).contains(p.getId())) {
+                                        userService.getUserHistory().get(userId).add(p.getId());
+                                    }
+
                                     return 1; // thank you for buying come again
-                                }else if(p.getPrice() <= u.getBalance()){
+                                }else if(p.getPrice() <= u.getBalance() && p.isDiscount20()){
+                                    u.setBalance(u.getBalance()-(p.getPrice()*0.2));
+                                    m.setStock(m.getStock()-1);
+                                    m.setSoldProducts(m.getSoldProducts()+1);
+
+                                    if (!userService.getUserHistory().containsKey(userId)) {
+                                        userService.getUserHistory().put(userId, new ArrayList<>());
+                                    }
+                                    if (!userService.getUserHistory().get(userId).contains(p.getId())) {
+                                        userService.getUserHistory().get(userId).add(p.getId());
+                                    }
+
+
+                                    return 1; // thank you for buying come again
+                                }else if (p.getPrice() <= u.getBalance()){
                                     u.setBalance(u.getBalance()-p.getPrice());
                                     m.setStock(m.getStock()-1);
                                     m.setSoldProducts(m.getSoldProducts()+1);
-                                    return 1; // thank you for buying come again
+
+                                    if (!userService.getUserHistory().containsKey(userId)) {
+                                        userService.getUserHistory().put(userId, new ArrayList<>());
+                                    }
+                                    if (!userService.getUserHistory().get(userId).contains(p.getId())) {
+                                        userService.getUserHistory().get(userId).add(p.getId());
+                                    }
+
                                 }else {
                                     return 2; // user balance less than product price
                                 }
@@ -134,7 +189,7 @@ public class MerchantStockService {
 
     //5 endpoints
     //5. merchants performance
-    public ArrayList<String> merchantPerformance(String userId, boolean quality) {
+    public Map<String, Object> merchantPerformance(String userId) {
         User foundUser = null;
         for (User u : userService.getAll()) {
             if (u.getId().equals(userId)) {
@@ -143,7 +198,7 @@ public class MerchantStockService {
             }
         }
 
-        if (foundUser == null || !foundUser.getRole().equals("Admin")) {
+        if (foundUser == null) {
             return null;
         }
 
@@ -155,10 +210,17 @@ public class MerchantStockService {
         for (MerchantStock stock : stocks){
             maxSold = Math.max(maxSold,stock.getSoldProducts());
         }
-
+        if(maxSold == 0){
+            maxSold = 1;
+        }
 
         for (MerchantStock stock : stocks) {
             String merchantId = stock.getMerchantId();
+            for (Product p : productService.getAll()){
+                if (p.getId().equals(stock.getProductId())){
+                    stock.setMerchantRate(p.getProductRate());
+                }
+            }
 
             double rate = stock.getMerchantRate();
             int sold = stock.getSoldProducts();
@@ -168,11 +230,9 @@ public class MerchantStockService {
 
             double normalizedSold = (double) sold / maxSold;
             double ratio;
-            if (quality) {
+
                 ratio =(rate * 0.7) + (normalizedSold * 0.3);
-            }else {
-                ratio =(rate * 0.5) + (normalizedSold * 0.5);
-            }
+
             if (merchantScoreMap.containsKey(merchantId)) {
                 double oldRatio = merchantScoreMap.get(merchantId);
                 merchantScoreMap.put(merchantId, (oldRatio + ratio) / 2);
@@ -197,17 +257,36 @@ public class MerchantStockService {
             }
         }
 
-        ArrayList<String> output = new ArrayList<>();
+        Map<String, Object> output = new LinkedHashMap<>();
 
         for (Map.Entry<String, Double> entry : entryList) {
             String merchantId = entry.getKey();
             double ratio = entry.getValue();
             int stock = merchantStockMap.getOrDefault(merchantId, 0);
-
-            output.add("MerchantId: " + merchantId + ", Score: " + String.format("%.2f", ratio) + ", Stock: " + stock);
+            Map<String, Object> merchantInfo = new LinkedHashMap<>();
+            merchantInfo.put("Score", String.format("%.2f", ratio));
+            merchantInfo.put("Stock", stock);
+            output.put("merchant id "+merchantId, merchantInfo);
         }
 
         return output;
+    }
+
+
+    public int toggleDiscount20(String merchantId, String productId){
+        for (MerchantStock m : stocks){
+            if(m.getMerchantId().equals(merchantId)){
+                    for (Product p : productService.getAll()){
+                        if(p.getId().equals(productId)){
+                            p.setDiscount20(!p.isDiscount20());
+                            return 1; //discount updated
+                        }
+                    }
+                    return -2; // product not found
+            }
+        }
+
+        return -1; //merchant not found
     }
 
 
