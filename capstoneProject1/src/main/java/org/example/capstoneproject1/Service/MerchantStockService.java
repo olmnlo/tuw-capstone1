@@ -276,12 +276,14 @@ public class MerchantStockService {
     public int toggleDiscount20(String merchantId, String productId){
         for (MerchantStock m : stocks){
             if(m.getMerchantId().equals(merchantId)){
-                    for (Product p : productService.getAll()){
-                        if(p.getId().equals(productId)){
+                if(m.getProductId().equals(productId)) {
+                    for (Product p : productService.getAll()) {
+                        if (p.getId().equals(productId)) {
                             p.setDiscount20(!p.isDiscount20());
                             return 1; //discount updated
                         }
                     }
+                }
                     return -2; // product not found
             }
         }
