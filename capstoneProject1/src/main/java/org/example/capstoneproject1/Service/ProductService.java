@@ -39,6 +39,7 @@ public class ProductService {
     public boolean updateProduct(String id, Product updatedProduct) {
         for (int i = 0; i < products.size(); i++) {
             if (products.get(i).getId().equals(id)) {
+                updatedProduct.setProductRate(products.get(i).getProductRate());
                 products.set(i, updatedProduct);
                 return true;
             }

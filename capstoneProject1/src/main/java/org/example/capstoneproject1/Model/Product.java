@@ -26,8 +26,9 @@ public class Product {
     private String categoryID;
 
     private double productRate;
-
+    @AssertFalse(message = "discount false")
     private boolean discount20;
+    @AssertFalse(message = "is seasonal product false")
     private boolean isSeasonalProduct;
     private double offer;
 

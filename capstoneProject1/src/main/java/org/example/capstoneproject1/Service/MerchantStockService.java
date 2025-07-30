@@ -42,6 +42,8 @@ public class MerchantStockService {
     public boolean updateMerchantStock(String id, MerchantStock updatedStock) {
         for (int i = 0; i < stocks.size(); i++) {
             if (stocks.get(i).getId().equals(id)) {
+                updatedStock.setMerchantRate(stocks.get(i).getMerchantRate());
+                updatedStock.setSoldProducts(stocks.get(i).getSoldProducts());
                 stocks.set(i, updatedStock);
                 return true;
             }
@@ -80,14 +82,11 @@ public class MerchantStockService {
     public int buyDirectly(String userId, String productId, String merchantId) {
         for (MerchantStock m : stocks){
             if(m.getMerchantId().equals(merchantId)){
-                System.out.println("merchant found");
                 for (User u : userService.getAll()){
                     if(u.getId().equals(userId)){
-                        System.out.println("user found");
                         for (Product p : productService.getAll()){
                             if(p.getId().equals(productId)){
-                                System.out.println("product found");
-                                if (p.getPrice() <= u.getBalance() && p.isSeasonalProduct() &&p.isDiscount20()){
+                                if (p.getPrice() <= u.getBalance() && p.isSeasonalProduct() && p.isDiscount20() && m.getStock() > 0 ){
                                     double discount = p.getOffer()+0.2;
                                     u.setBalance(u.getBalance()-(p.getPrice()-(p.getPrice()*discount)));
                                     m.setStock(m.getStock()-1);
@@ -102,7 +101,7 @@ public class MerchantStockService {
 
                                     return 1; // thank you for buying come again
 
-                                }else if(p.getPrice() <= u.getBalance() && p.isSeasonalProduct()){
+                                }else if(p.getPrice() <= u.getBalance() && p.isSeasonalProduct() && m.getStock() > 0){
                                     u.setBalance(u.getBalance()-(p.getPrice()-(p.getPrice()*p.getOffer())));
                                     m.setStock(m.getStock()-1);
                                     m.setSoldProducts(m.getSoldProducts()+1);
@@ -115,7 +114,7 @@ public class MerchantStockService {
                                     }
 
                                     return 1; // thank you for buying come again
-                                }else if(p.getPrice() <= u.getBalance() && p.isDiscount20()){
+                                }else if(p.getPrice() <= u.getBalance() && p.isDiscount20() && m.getStock() > 0){
                                     u.setBalance(u.getBalance()-(p.getPrice()*0.2));
                                     m.setStock(m.getStock()-1);
                                     m.setSoldProducts(m.getSoldProducts()+1);
