@@ -139,7 +139,7 @@ public class MerchantStockService {
                                     if (!userService.getUserHistory().get(userId).contains(p.getId())) {
                                         userService.getUserHistory().get(userId).add(p.getId());
                                     }
-
+                                    return 1; // thank you for buying come again
                                 }else {
                                     return 2; // user balance less than product price
                                 }
